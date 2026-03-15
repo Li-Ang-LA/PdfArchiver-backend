@@ -14,7 +14,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://frontend-pi-orpin-46.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,7 +54,10 @@ def get_current_user(
 def register(body: UserIn, db: Session = Depends(get_db)):
     if db.query(models.User).filter(models.User.username == body.username).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken")
-    user = models.User(username=body.username, hashed_password=auth.hash_password(body.password))
+    user = models.User(
+        username=body.username,
+        hashed_password=auth.hash_password(body.password),
+    )
     db.add(user)
     db.commit()
     return TokenOut(access_token=auth.create_access_token(user.username))
